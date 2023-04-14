@@ -1,4 +1,8 @@
-﻿using System.Security.Cryptography;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace SIIDecryptSharp
@@ -7,11 +11,22 @@ namespace SIIDecryptSharp
     {
         public UInt32 Signature;
         public UInt32 DataSize;
+
+        public SII_Header() {
+            Signature = 999;
+            DataSize = 0;
+        }
     }
     public class SII_Data
     {
         public SII_Header Header;
         public byte[] Data;
+
+        public SII_Data()
+        {
+            Header = new SII_Header();
+            Data = new byte[0];
+        }
     }
     public class Decryptor
     {
@@ -36,13 +51,10 @@ namespace SIIDecryptSharp
                 {
                     case ((UInt32)SignatureType.Encrypted):
                         return Decrypt(ref bytes, streamPos);
-                        break;
                     case ((uint)SignatureType.PlainText):
                         return DecodePlaintext(ref bytes, streamPos);
-                        break;
                     case ((uint)SignatureType.Binary):
                         return DecodeBinary(ref bytes, streamPos);
-                        break;
                     case ((uint)SignatureType._3nK):
                         break;
                 }
@@ -59,7 +71,6 @@ namespace SIIDecryptSharp
             StringBuilder stringBuilder = new StringBuilder();
 
             List<byte> decrypted = new List<byte>();
-            Span<byte> buffer = new Span<byte>();
 
             SII_Header header = new SII_Header();
 

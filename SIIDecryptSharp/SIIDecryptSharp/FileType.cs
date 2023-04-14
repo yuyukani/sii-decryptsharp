@@ -8,7 +8,7 @@ namespace SIIDecryptSharp
 {
     public enum SignatureType
     {
-        Unknown = -1,
+        Unknown = 999,
         PlainText = 1315531091,
         Encrypted = 1131635539,
         Binary = 1229542210,

@@ -1,10 +1,36 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <TargetFrameworks>net7.0;net6.0;netstandard2.0;netstandard2.1;</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>SII Decrypt Sharp</Title>
+    <Company>Joshua Menzel</Company>
+    <Description>A modern library for decrypting and decoding SCS Software save game files (sii).</Description>
+    <Copyright>Copyright 2023 Joshua Menzel</Copyright>
+    <RepositoryUrl>https://gitlab.com/jammerxd/sii-decryptsharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>American Truck Simulator; Euro Truck Simulator 2; SCS Software;</PackageTags>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <EnableNETAnalyzers>False</EnableNETAnalyzers>
+    <RunAnalyzersDuringLiveAnalysis>False</RunAnalyzersDuringLiveAnalysis>
+    <PackageProjectUrl>https://gitlab.com/jammerxd/sii-decryptsharp</PackageProjectUrl>
+    <Platforms>AnyCPU;ARM32;ARM64;x64;x86</Platforms>
+    <Configurations>Debug;Release;</Configurations>
+    <SignAssembly>False</SignAssembly>
+    <AssemblyVersion></AssemblyVersion>
+    <FileVersion></FileVersion>
+    <Version>1.0.0-alpha2</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="zlib.dll">
@@ -12,4 +38,7 @@
     </None>
   </ItemGroup>
 
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="&quot;$(CodeSign)&quot; &quot;$(TargetDir)$(TargetName)$(TargetExt)&quot;" />
+  </Target>
 </Project>

@@ -36,7 +36,7 @@ namespace SIIDecryptSharp
             0xc2, 0x73, 0x71, 0x56, 0x3f, 0xbf, 0x1f, 0x3c, 0x9e, 0xdf, 0x6b, 0x11, 0x82, 0x5a, 0x5d, 0x0a
         };
 
-        public static SII_Data Decrypt(string filePath)
+        public static SII_Data Decrypt(string filePath, bool decode=true)
         {
             var bytes = File.ReadAllBytes(filePath);
 
@@ -47,16 +47,23 @@ namespace SIIDecryptSharp
                 var fileType = BitConverter.ToUInt32(bytes, streamPos);
                 streamPos += sizeof(UInt32);
 
-                switch (fileType)
+                if(fileType == (UInt32)SignatureType.Encrypted)
                 {
-                    case ((UInt32)SignatureType.Encrypted):
-                        return Decrypt(ref bytes, streamPos);
-                    case ((uint)SignatureType.PlainText):
-                        return DecodePlaintext(ref bytes, streamPos);
-                    case ((uint)SignatureType.Binary):
-                        return DecodeBinary(ref bytes, streamPos);
-                    case ((uint)SignatureType._3nK):
-                        break;
+                    var data = Decrypt(ref bytes, streamPos);
+                    bytes = data.Data;
+                }
+
+                if (decode)
+                {
+                    switch (fileType)
+                    {
+                        case ((uint)SignatureType.PlainText):
+                            return DecodePlaintext(ref bytes, streamPos);
+                        case ((uint)SignatureType.Binary):
+                            return DecodeBinary(ref bytes, streamPos);
+                        case ((uint)SignatureType._3nK):
+                            break;
+                    }
                 }
             }
             else

@@ -29,5 +29,25 @@ namespace SIIDecryptSharp
             }
             return false;
         }
+        public static bool ReadBool(ref byte[] bytes, ref int offset)
+        {
+            var result = BitConverter.ToBoolean(bytes, offset);
+            offset += sizeof(bool);
+            return result;
+        }
+        public static bool TryReadBool(ref byte[] bytes, ref int offset, out bool result)
+        {
+            try
+            {
+                result = BitConverter.ToBoolean(bytes, offset);
+                offset += sizeof(bool);
+                return true;
+            }
+            catch
+            {
+                result = false;
+            }
+            return false;
+        }
     }
 }

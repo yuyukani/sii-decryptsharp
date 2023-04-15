@@ -108,21 +108,22 @@ namespace SIIDecryptSharp
             }
 
 
-            var finalEncrypted = encrypted.Skip(streamPos);
+            var finalEncrypted = encrypted.Skip(streamPos).ToArray();
 
             using (Aes aes = Aes.Create())
             {
                 aes.Key = SII_Key;
                 aes.IV = IV;
 
+                // Decrypt
                 ICryptoTransform decipher = aes.CreateDecryptor(aes.Key, aes.IV);
-                using (MemoryStream ms = new MemoryStream(finalEncrypted.ToArray()))
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    using (CryptoStream cs = new CryptoStream(ms, decipher, CryptoStreamMode.Read))
+                    using (CryptoStream cs = new CryptoStream(ms, decipher, CryptoStreamMode.Write))
                     {
-                        byte[] decryptBuff = new byte[finalEncrypted.Count()];
-                        cs.Read(decryptBuff, 0, decryptBuff.Length);
-                        decrypted.AddRange(decryptBuff);
+                        cs.Write(finalEncrypted, 0, finalEncrypted.Length);
+                        cs.FlushFinalBlock();
+                        decrypted.AddRange(ms.ToArray());
                     }
                 }
             }

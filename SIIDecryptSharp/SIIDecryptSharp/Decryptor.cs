@@ -36,41 +36,46 @@ namespace SIIDecryptSharp
             0xc2, 0x73, 0x71, 0x56, 0x3f, 0xbf, 0x1f, 0x3c, 0x9e, 0xdf, 0x6b, 0x11, 0x82, 0x5a, 0x5d, 0x0a
         };
 
-        public static SII_Data Decrypt(string filePath, bool decode=true)
+        public static byte[] Decrypt(string filePath, bool decode=true)
         {
             var bytes = File.ReadAllBytes(filePath);
 
             int streamPos = 0;
 
-            if (bytes.Length >= streamPos + sizeof(UInt32))
+            if(!StreamUtils.TryReadUInt32(ref bytes, ref streamPos, out UInt32 fileType))
             {
-                var fileType = BitConverter.ToUInt32(bytes, streamPos);
-                streamPos += sizeof(UInt32);
+                throw new Exception("Invalid file");
+            }
 
-                if(fileType == (UInt32)SignatureType.Encrypted)
+            if(fileType == (UInt32)SignatureType.Encrypted)
+            {
+                var data = Decrypt(ref bytes, streamPos);
+                bytes = data.Data;
+                byte[] destination = new byte[data.Header.DataSize];
+                uint dataSize = (uint)data.Header.DataSize;
+                Zlib.uncompress(destination, ref dataSize, data.Data, (uint)data.Data.Length);
+                data.Data = destination;
+                bytes = destination;
+                data = new SII_Data();
+            }
+            if (decode)
+            {
+                streamPos = 0;
+                if (!StreamUtils.TryReadUInt32(ref bytes, ref streamPos, out UInt32 dataType))
                 {
-                    var data = Decrypt(ref bytes, streamPos);
-                    bytes = data.Data;
+                    throw new Exception("Invalid data");
                 }
-
-                if (decode)
+                switch (dataType)
                 {
-                    switch (fileType)
-                    {
-                        case ((uint)SignatureType.PlainText):
-                            return DecodePlaintext(ref bytes, streamPos);
-                        case ((uint)SignatureType.Binary):
-                            return DecodeBinary(ref bytes, streamPos);
-                        case ((uint)SignatureType._3nK):
-                            break;
-                    }
+                    case ((uint)SignatureType.PlainText):
+                        return DecodePlaintext(ref bytes, streamPos).Data;
+                    case ((uint)SignatureType.Binary):
+                        return DecodeBinary(ref bytes, streamPos).Data;
+                    case ((uint)SignatureType._3nK):
+                        break;
                 }
             }
-            else
-            {
-                throw new Exception("Not enough data");
-            }
-            return new SII_Data();
+            return new byte[0];
         }
 
         private static SII_Data Decrypt(ref byte[] encrypted, int offset)
@@ -149,7 +154,7 @@ namespace SIIDecryptSharp
             result.Header.DataSize = (uint)data.Length;
             result.Header.Signature = (uint)SignatureType.Binary;
 
-
+            BSII_Decoder.Decode(ref data);
 
             return result;
         }

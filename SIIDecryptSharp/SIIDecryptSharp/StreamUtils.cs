@@ -93,19 +93,40 @@ namespace SIIDecryptSharp
         public static string ReadChars(ref byte[] bytes, ref int offset)
         {
             var length = (int)ReadUInt32(ref bytes, ref offset);
-            return System.Text.Encoding.ASCII.GetString(bytes.Skip(offset).Take(length).ToArray());
+            return System.Text.Encoding.UTF8.GetString(bytes.Skip(offset).Take(length).ToArray());
         }
         public static bool TryReadChars(ref byte[] bytes, ref int offset, out string result)
         {
             try
             {
                 var length = (int)ReadUInt32(ref bytes, ref offset);
-                result = System.Text.Encoding.ASCII.GetString(bytes.Skip(offset).Take(length).ToArray());
+                result = System.Text.Encoding.UTF8.GetString(bytes.Skip(offset).Take(length).ToArray());
                 return true;
             }
             catch
             {
                 result = string.Empty;
+            }
+            return false;
+        }
+
+        public static UInt64 ReadUInt64(ref byte[] bytes, ref int offset)
+        {
+            var result = BitConverter.ToUInt64(bytes, offset);
+            offset += sizeof(UInt64);
+            return result;
+        }
+        public static bool TryReadUInt64(ref byte[] bytes, ref int offset, out UInt64 result)
+        {
+            try
+            {
+                result = BitConverter.ToUInt64(bytes, offset);
+                offset += sizeof(UInt64);
+                return true;
+            }
+            catch
+            {
+                result = 0;
             }
             return false;
         }

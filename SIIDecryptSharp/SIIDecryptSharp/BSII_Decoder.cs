@@ -39,6 +39,8 @@ namespace SIIDecryptSharp
         {
             Segments = new List<BSII_DataSegment>();
         }
+
+        public dynamic ID { get; set; }
     }
 
     public class BSII_DataSegment
@@ -47,7 +49,6 @@ namespace SIIDecryptSharp
         public UInt32 Type { get; set; }
 
         public dynamic Value { get; set; }
-        public dynamic ID { get; set; }
     }
 
     public enum BSII_Supported_Versions
@@ -59,7 +60,6 @@ namespace SIIDecryptSharp
 
     public class BSII_Decoder
     {
-        private static char[] CharTable = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '_' };
 
         public static void Decode(ref byte[] bytes)
         {
@@ -187,7 +187,9 @@ namespace SIIDecryptSharp
 
                 BSII_DataSegment segment = new BSII_DataSegment();
                 segment.Type = ValueType;
-                segment.Name = StreamUtils.ReadChars(ref bytes, ref streamPos);
+                var length2 = StreamUtils.ReadUInt32(ref bytes, ref streamPos);
+                var trueLength2 = (int)length2;
+                segment.Name = StreamUtils.ReadChars(ref bytes, ref streamPos, trueLength2);
                 if(segment.Type == 0x37)
                 {
                     segment.Value = StreamUtils.ReadUInt32(ref bytes, ref streamPos);
@@ -200,8 +202,40 @@ namespace SIIDecryptSharp
 
         private static bool LoadDataBlockLocal(ref byte[] bytes, ref int streamPos, ref BSII_StructureBlock segment)
         {
+            segment.ID = LoadDataBlockId(ref  bytes, ref streamPos);
+
+            for(int i = 0; i < segment.Segments.Count; i ++)
+            {
+                var dataType = segment.Segments[i].Type;
+                switch(dataType)
+                {
+
+                }
+            }
 
             return true;
         }
+
+        private static dynamic LoadDataBlockId(ref byte[] bytes, ref int streamPos)
+        {
+            var IDLength = StreamUtils.ReadInt8(ref bytes, ref streamPos);
+            if(IDLength == 255)//0xFF
+            {
+                var id = StreamUtils.ReadUInt64(ref bytes, ref streamPos);
+                return id;
+            }
+            else
+            {
+                List<string> parts = new List<string>();
+                for(int i = 0; i < IDLength; i++)
+                {
+                    UInt64 part = StreamUtils.ReadUInt64(ref bytes, ref streamPos);
+                    parts.Add(DecoderUtils.DecodeUInt64String(part));
+                }
+                return parts.ToArray();
+            }
+            
+        }
+        
     }
 }

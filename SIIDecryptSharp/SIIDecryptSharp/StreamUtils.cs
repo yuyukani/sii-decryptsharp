@@ -93,7 +93,9 @@ namespace SIIDecryptSharp
         public static string ReadChars(ref byte[] bytes, ref int offset)
         {
             var length = (int)ReadUInt32(ref bytes, ref offset);
-            return System.Text.Encoding.UTF8.GetString(bytes.Skip(offset).Take(length).ToArray());
+            var result = System.Text.Encoding.UTF8.GetString(bytes.Skip(offset).Take(length).ToArray());
+            offset += length;
+            return result;
         }
         public static bool TryReadChars(ref byte[] bytes, ref int offset, out string result)
         {
@@ -101,6 +103,7 @@ namespace SIIDecryptSharp
             {
                 var length = (int)ReadUInt32(ref bytes, ref offset);
                 result = System.Text.Encoding.UTF8.GetString(bytes.Skip(offset).Take(length).ToArray());
+                offset += length;
                 return true;
             }
             catch
@@ -129,6 +132,18 @@ namespace SIIDecryptSharp
                 result = 0;
             }
             return false;
+        }
+
+        public static Dictionary<uint, string> ReadOrdinalStrings(ref byte[] bytes, ref int offset)
+        {
+            var length = ReadUInt32(ref bytes, ref offset);
+            Dictionary<uint,string> values = new Dictionary<uint,string>();
+            for(int i = 0; i < length; i++)
+            {
+                var ordinal = ReadUInt32(ref bytes, ref offset);
+                values.Add(ordinal,ReadChars(ref bytes, ref offset));
+            }
+            return values;
         }
     }
 }

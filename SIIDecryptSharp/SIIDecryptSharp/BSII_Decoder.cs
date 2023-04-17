@@ -8,6 +8,30 @@ using System.Threading.Tasks;
 
 namespace SIIDecryptSharp
 {
+    public enum DataTypeId
+    {
+        UTF8String=0x01,
+        ArrayOfUTF8String=0x02,
+        EncodedString=0x03,
+        ArrayOfEncodedString=0x04,
+        //4 byte float
+        Single=0x05,
+        //array of 4 byte float
+        ArrayOfSingle=0x06,
+        //2 4 byte floats
+        VectorOf2Single=0x07,
+        //3 4 byte floats
+        VectorOf3Single=0x09,
+        //Array of vectors of 3 4 byte floats (array of type 0x9)
+        ArrayOfVectorOf3Single=0x0A,
+        //3 4 byte signed integers
+        VectorOf3Int32=0x11,
+        //Array of vectors of 3 4 byte signed integers(array of type 0x11)
+        ArrayOfVectorOf3Int32=0x12,
+
+        OrdinalStringArray=55,
+        Id=57
+    }
     public class BSII_Data
     {
         public BSII_Header Header { get; set; }
@@ -87,81 +111,68 @@ namespace SIIDecryptSharp
             BSII_StructureBlock currentBlock = new BSII_StructureBlock();
             bool keepReading = true;
             UInt32 blockType = 0;
+            List<Tuple<uint, string>> blocks = new List<Tuple<uint, string>>();
             do
             {
                 blockType = StreamUtils.ReadUInt32(ref bytes, ref streamPos);
 
-                if (blockType != 0)
+                if (blockType == 0)
                 {
-                    //load data block local
-                    var blockData = fileData.Blocks.Where(x => x.StructureId == blockType).First();
-                    LoadDataBlockLocal(ref bytes, ref streamPos, ref blockData);
-                    fileData.Blocks.RemoveAll(x=>x.StructureId == blockType);
-                    fileData.Blocks.Add(blockData);
-                    break;
+                    currentBlock = new BSII_StructureBlock();
+                    if (!StreamUtils.TryReadBool(ref bytes, ref streamPos, out bool valid))
+                    {
+                        Debug.WriteLine("ERROR INSIDE STRUCT");
+                        return;
+                    }
+                    if (!valid)
+                    {
+                        Debug.WriteLine("End of file");
+                        break;
+                    }
+
+                    if (!StreamUtils.TryReadUInt32(ref bytes, ref streamPos, out UInt32 structId))
+                    {
+                        Debug.WriteLine("Struct Id Error");
+                        return;
+                    }
+
+                    if (!StreamUtils.TryReadUInt32(ref bytes, ref streamPos, out UInt32 structNameLength))
+                    {
+                        Debug.WriteLine("Struct name length Error");
+                        return;
+                    }
+
+                    if (!StreamUtils.TryReadChars(ref bytes, ref streamPos, (int)structNameLength, out string structName))
+                    {
+                        Debug.WriteLine("Struct name error");
+                        return;
+                    }
+
+                    currentBlock.StructureId = structId;
+                    currentBlock.Name = structName;
+                    currentBlock.Validity = valid;
+                    currentBlock.Type = blockType;
+
+                    BSII_DataSegment segment = new BSII_DataSegment();
+                    segment.Type = 999;
+
+                    while (segment.Type != 0)
+                    {
+                        segment = ReadDataBlock(ref bytes, ref streamPos);
+                        currentBlock.Segments.Add(segment);
+                    }
+                    fileData.Blocks.Add(currentBlock);
+                    blocks.Add(new Tuple<uint, string>(currentBlock.StructureId, currentBlock.Name));
+                    Debug.WriteLine("Done reading segments in struct id: " + structId.ToString());
                 }
                 else
                 {
-                    keepReading = LoadStructureBlockLocal(ref bytes, ref streamPos, out BSII_StructureBlock localBlock);
-                    if(keepReading)
-                    {
-                        fileData.Blocks.Add(localBlock);
-                    }
+                    var blockData = fileData.Blocks.Where(x => x.StructureId == blockType).First();
+                    LoadDataBlockLocal(ref bytes, ref streamPos, ref blockData);
+                    fileData.Blocks.RemoveAll(x => x.StructureId == blockType);
+                    fileData.Blocks.Add(blockData);
+                    break;
                 }
-
-                /*if (blockType == 0)
-                {
-                    //enter or exit struct block
-                    inStruct = !inStruct;
-                    if (inStruct)
-                    {
-                        currentBlock = new BSII_StructureBlock();
-                        if (!StreamUtils.TryReadBool(ref bytes, ref streamPos, out bool valid))
-                        {
-                            Debug.WriteLine("ERROR INSIDE STRUCT");
-                            return;
-                        }
-                        if (!valid)
-                        {
-                            Debug.WriteLine("End of file");
-                            break;
-                        }
-
-                        if (!StreamUtils.TryReadUInt32(ref bytes, ref streamPos, out UInt32 structId))
-                        {
-                            Debug.WriteLine("Struct Id Error");
-                            return;
-                        }
-
-                        if (!StreamUtils.TryReadUInt32(ref bytes, ref streamPos, out UInt32 structNameLength))
-                        {
-                            Debug.WriteLine("Struct name length Error");
-                            return;
-                        }
-
-                        if (!StreamUtils.TryReadChars(ref bytes, ref streamPos, (int)structNameLength, out string structName))
-                        {
-                            Debug.WriteLine("Struct name error");
-                            return;
-                        }
-                        currentBlock.StructureId = structId;
-                        currentBlock.Name = structName;
-                        currentBlock.Validity = valid;
-                        currentBlock.Type = blockType;
-
-                        BSII_DataSegment segment = new BSII_DataSegment();
-                        segment.Type = 999;
-
-                        while (segment.Type != 0)
-                        {
-                            segment = ReadDataBlock(ref bytes, ref streamPos);
-                            currentBlock.Segments.Add(segment);
-                        }
-                        inStruct = false;
-                        fileData.Blocks.Add(currentBlock);
-                        Debug.WriteLine("Done reading segments in struct id: " + structId.ToString());
-                    }
-                }*/
             } while (keepReading);
 
         }
@@ -237,5 +248,21 @@ namespace SIIDecryptSharp
             
         }
         
+        private static BSII_DataSegment ReadDataBlock(ref byte[] bytes, ref int streamPos)
+        {
+            var result = new BSII_DataSegment();
+            result.Type = StreamUtils.ReadUInt32(ref bytes, ref streamPos);
+            if (result.Type != 0)
+            {
+                result.Name = StreamUtils.ReadChars(ref bytes, ref streamPos);
+            }
+            //IF THE TYPE IS 55
+            if(result.Type == 55)
+            {
+                //READ THE ORDINAL STRING NOW
+                result.Value = StreamUtils.ReadOrdinalStrings(ref bytes, ref streamPos);
+            }
+            return result;
+        }
     }
 }

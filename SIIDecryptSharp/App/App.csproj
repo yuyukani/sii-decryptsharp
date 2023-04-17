@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <None Update="game.1.46.sii">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="info.sii">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

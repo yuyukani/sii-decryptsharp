@@ -132,7 +132,7 @@ namespace SIIDecryptSharp
     public class BSII_Decoder
     {
 
-        public static void Decode(ref byte[] bytes)
+        public static byte[] Decode(ref byte[] bytes)
         {
             int streamPos = 0;
 
@@ -188,6 +188,8 @@ namespace SIIDecryptSharp
             } while (streamPos < bytes.Length);
 
             Debug.WriteLine("DECODED!");
+
+            return BSII_Serializer.Serialize(ref fileData);
 
         }
 

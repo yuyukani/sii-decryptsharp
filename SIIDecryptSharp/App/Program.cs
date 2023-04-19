@@ -8,8 +8,8 @@ namespace App
         {
             Console.WriteLine("Hello, World!");
 
-            var compressed = Decryptor.Decrypt(Path.Combine(Directory.GetCurrentDirectory(), "game.1.46.sii"));
-            
+            var raw = Decryptor.Decrypt(Path.Combine(Directory.GetCurrentDirectory(), "game.1.46.sii"));
+            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "testing.txt"), System.Text.Encoding.UTF8.GetString(raw));
         }
     }
 }

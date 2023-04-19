@@ -72,7 +72,7 @@ namespace SIIDecryptSharp
                     case ((uint)SignatureType.Binary):
                         return DecodeBinary(ref bytes, streamPos).Data;
                     case ((uint)SignatureType._3nK):
-                        break;
+                        throw new NotImplementedException("_3nK decoding is not implmented yet.");
                 }
             }
             return new byte[0];
@@ -153,9 +153,7 @@ namespace SIIDecryptSharp
             result.Header = new SII_Header();
             result.Header.DataSize = (uint)data.Length;
             result.Header.Signature = (uint)SignatureType.Binary;
-
-            BSII_Decoder.Decode(ref data);
-
+            result.Data = BSII_Decoder.Decode(ref data);
             return result;
         }
     }

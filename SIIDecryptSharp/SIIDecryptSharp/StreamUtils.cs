@@ -49,16 +49,36 @@ namespace SIIDecryptSharp
             }
             return false;
         }
-        public static int ReadInt8(ref byte[] bytes, ref int offset) {
-            var result = (int)bytes.Skip(offset).Take(1).First();
+        public static byte ReadUInt8(ref byte[] bytes, ref int offset) {
+            var result = bytes.Skip(offset).Take(1).First();
             offset += 1;
             return result;
         }
-        public static bool TryReadInt8(ref byte[] bytes, ref int offset, out int result)
+        public static bool TryReadUInt8(ref byte[] bytes, ref int offset, out byte result)
         {
             try
             {
-                result = (int)bytes.Skip(offset).Take(1).First();
+                result = (byte)bytes.Skip(offset).Take(1).First();
+                offset += 1;
+                return true;
+            }
+            catch
+            {
+                result = 0;
+            }
+            return false;
+        }
+        public static sbyte ReadInt8(ref byte[] bytes, ref int offset)
+        {
+            var result = Convert.ToSByte(bytes.Skip(offset).Take(1).First());
+            offset += 1;
+            return result;
+        }
+        public static bool TryReadInt8(ref byte[] bytes, ref int offset, out sbyte result)
+        {
+            try
+            {
+                result = Convert.ToSByte(bytes.Skip(offset).Take(1).First());
                 offset += 1;
                 return true;
             }
@@ -144,6 +164,26 @@ namespace SIIDecryptSharp
                 values.Add(ordinal,ReadChars(ref bytes, ref offset));
             }
             return values;
+        }
+        public static Single ReadSingle(ref byte[] bytes, ref int offset)
+        {
+            var result = BitConverter.ToSingle(bytes, offset);
+            offset += sizeof(Single);
+            return result;
+        }
+        public static bool TryReadSingle(ref byte[] bytes, ref int offset, out Single result)
+        {
+            try
+            {
+                result = BitConverter.ToSingle(bytes, offset);
+                offset += sizeof(Single);
+                return true;
+            }
+            catch
+            {
+                result = 0.00f;
+            }
+            return false;
         }
     }
 }

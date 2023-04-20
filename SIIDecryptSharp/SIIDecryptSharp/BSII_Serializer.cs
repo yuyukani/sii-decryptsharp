@@ -13,7 +13,7 @@ namespace SIIDecryptSharp
         {
             //serialize the data:
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine("SiiUnit");
+            sb.AppendLine("SiiNunit");
             sb.AppendLine("{");
 
             string indent = "";
@@ -147,6 +147,7 @@ namespace SIIDecryptSharp
                 
 
             }
+            sb.AppendLine("}");
             return System.Text.Encoding.UTF8.GetBytes(sb.ToString());
         }
 
@@ -175,7 +176,8 @@ namespace SIIDecryptSharp
                 }
                 else
                 {
-                    sb.AppendLine(indent + data.Name + "[" + i + "]: \"" + value[i] + "\"");
+                    //visited_cities array has no quotes
+                    sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i] + "");
                 }
                 
             }
@@ -212,7 +214,24 @@ namespace SIIDecryptSharp
             sb.AppendLine(indent + data.Name + ": " + value.Length);
             for (int i = 0; i < value.Length; i++)
             {
-                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+                string text = "nil";
+
+                if (value[i] - Math.Truncate(value[i]) != 0.00f || value[i] >= 1e7)
+                {
+                    text = "";
+                    var bytes = BitConverter.GetBytes(value[i]);
+                    foreach (byte b in bytes)
+                    {
+                        text = b.ToString("x2") + text;
+                    }
+                    text = "&" + text;
+                }
+                else
+                {
+                    text = ((int)value[i]).ToString("f0");
+                }
+                
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + text);
             }
             return sb.ToString();
         }
@@ -262,7 +281,21 @@ namespace SIIDecryptSharp
                 }
                 else
                 {
-                    sb.AppendLine(indent + data.Name + "[" + i + "]: \"" + value[i] + "\"");
+                    if (string.IsNullOrEmpty(value[i]))
+                    {
+                        sb.AppendLine(indent + data.Name + "[" + i + "]: " + "\"\"");
+                    }
+                    else
+                    {
+                        if (IsLimitedAlphabet(ref value[i]))
+                        {
+                            sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i]);
+                        }
+                        else
+                        {
+                            sb.AppendLine(indent + data.Name + "[" + i + "]: " + "\"" + value[i] + "\"");
+                        }
+                    }
                 }
             }
             return sb.ToString();
@@ -338,7 +371,11 @@ namespace SIIDecryptSharp
         {
             string value = data.Value as string;
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(indent + data.Name + ": \"" + value + "\"");
+            if(string.IsNullOrEmpty(value))
+            {
+                value = "\"\"";
+            }
+            sb.AppendLine(indent + data.Name + ": " + value);
             return sb.ToString();
         }
         public static string SerializeId(ref BSII_DataSegment data, ref string indent)
@@ -368,10 +405,10 @@ namespace SIIDecryptSharp
         }
         public static string SerializeUInt32(ref BSII_DataSegment data, ref string indent)
         {
-            Int32? value = data.Value as Int32?;
+            UInt32? value = data.Value as UInt32?;
             StringBuilder sb = new StringBuilder();
             string text = "nil";
-            if (value != null) text = value.ToString();
+            if (value != null && value != 4294967295) text = value.ToString();
             sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
@@ -389,7 +426,7 @@ namespace SIIDecryptSharp
             UInt16? value = data.Value as UInt16?;
             StringBuilder sb = new StringBuilder();
             string text = "nil";
-            if (value != null) text = value.ToString();
+            if (value != null && value != 65535) text = value.ToString();
             sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
@@ -398,7 +435,7 @@ namespace SIIDecryptSharp
             var value = data.Value as string;
             StringBuilder sb = new StringBuilder();
             sb.Append(indent + data.Name + ": ");
-            sb.AppendLine("\"" + value + "\"");
+            sb.AppendLine(value);
             return sb.ToString();
         }
         public static string SerializeSingle(ref BSII_DataSegment data, ref string indent)
@@ -406,7 +443,23 @@ namespace SIIDecryptSharp
             Single? value = data.Value as Single?;
             StringBuilder sb = new StringBuilder();
             string text = "nil";
-            if (value != null) text = value.ToString();
+            if (value.HasValue)
+            {
+                if(value.Value - Math.Truncate(value.Value) != 0.00f || value.Value >= 1e7) 
+                {
+                    text = "";
+                    var bytes = BitConverter.GetBytes(value.Value);
+                    foreach(byte b in bytes)
+                    {
+                        text = b.ToString("x2") + text;
+                    }
+                    text = "&" + text;
+                }
+                else
+                {
+                    text = ((int)value.Value).ToString("f0");
+                }
+            }
             sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
@@ -422,7 +475,21 @@ namespace SIIDecryptSharp
             }
             else
             {
-                sb.AppendLine("\"" + value + "\"");
+                if (string.IsNullOrEmpty(value))
+                {
+                    sb.AppendLine("\"\"");
+                }
+                else
+                {
+                    if (IsLimitedAlphabet(ref value))
+                    {
+                        sb.AppendLine(value);
+                    }
+                    else
+                    {
+                        sb.AppendLine("\"" + value + "\"");
+                    }
+                }
             }
             
             return sb.ToString();
@@ -457,5 +524,18 @@ namespace SIIDecryptSharp
             StringBuilder sb = new StringBuilder();
             return sb.ToString();
         }
+
+        private static bool IsLimitedAlphabet(ref string value)
+        {
+            for(int i = 0; i < value.Length; i++)
+            {
+                if (!LimitedAlphabet.Contains(value[i])) return false;
+            }
+            return true;
+        }
+        private static char[] LimitedAlphabet = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
+            'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
+            'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '_'
+        };
     }
 }

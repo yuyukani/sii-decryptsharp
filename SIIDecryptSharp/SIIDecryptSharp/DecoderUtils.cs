@@ -420,15 +420,20 @@ namespace SIIDecryptSharp
                 {
                     if (i % 2 == 0 && i > 0)
                     {
-                        while (currentPart.StartsWith("0"))
+
+                        if (i >= data.Length - 2)
                         {
-                            currentPart = currentPart.Substring(1);
+                            while (currentPart.StartsWith("0"))
+                            {
+                                currentPart = currentPart.Substring(1);
+                            }
                         }
-                        if(!String.IsNullOrEmpty(currentPart))
+
+                        if (!String.IsNullOrEmpty(currentPart))
                         {
                             result.Value = currentPart + "." + result.Value;
                         }
-
+                        
                         parts[(data.Length/2) - (i / 2)] = currentPart;
                         currentPart = "";
                     }
@@ -448,7 +453,6 @@ namespace SIIDecryptSharp
                     }
                 }
                 result.Value = "_nameless." + result.Value.Substring(0,result.Value.Length-1);
-
             }
             else
             {

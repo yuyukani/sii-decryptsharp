@@ -218,9 +218,7 @@ namespace SIIDecryptSharp
                             Value = blockDataItem.ID.Value,
                         };
                     }
-                    //fileData.Blocks.Remove(blockData);
                     Dictionary<UInt32, string> list = new Dictionary<UInt32, string>();
-
                     if(ordinalLists.ContainsKey(blockData.StructureId)) list = ordinalLists[blockData.StructureId];
                     LoadDataBlockLocal(ref bytes, ref streamPos, ref blockData, fileData.Header.Version, ref list);
                     fileData.DecodedBlocks.Add(blockData);

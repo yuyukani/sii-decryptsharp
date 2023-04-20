@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,13 +17,13 @@ namespace SIIDecryptSharp
             sb.AppendLine("{");
 
             string indent = "";
-            foreach (var block in data.Blocks)
+            foreach (var block in data.DecodedBlocks)
             {
                 if (String.IsNullOrEmpty(block.Name) || String.IsNullOrEmpty(block.ID?.Value))
                     continue;
 
                 sb.AppendLine(block.Name + " : " + block.ID.Value + " {");
-                indent += " ";
+                indent = " ";
 
                 foreach (var s1 in block.Segments)
                 {
@@ -142,7 +143,7 @@ namespace SIIDecryptSharp
                         }
                     }
                 }
-                sb.AppendLine("}");
+                sb.AppendLine("}").AppendLine("");
                 
 
             }
@@ -168,131 +169,262 @@ namespace SIIDecryptSharp
             sb.AppendLine(indent + data.Name + ": " + value.Length);
             for(int i = 0; i < value.Length; i ++)
             {
-                sb.AppendLine(indent + data.Name + "[" + i +"]:" + value[i]);
+                if (int.TryParse(value[i], out int int32))
+                {
+                    sb.AppendLine(indent + data.Name + "[" + i +"]: " + value[i]);
+                }
+                else
+                {
+                    sb.AppendLine(indent + data.Name + "[" + i + "]: \"" + value[i] + "\"");
+                }
+                
             }
             return sb.ToString();
         }
         
         public static string SerializeIDArray(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as IDComplexType[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].Value);
+            }
             return sb.ToString();
         }
                                
         public static string SerializeInt32Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as Int32[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+            }
             return sb.ToString();
         }
         public static string SerializeSingleArray(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as Single[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+            }
             return sb.ToString();
         }
         public static string SerializeUInt16Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as UInt16[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+            }
             return sb.ToString();
         }
         public static string SerializeUInt32Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as UInt32[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+            }
             return sb.ToString();
         }
         public static string SerializeUInt64Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as UInt64[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+            }
             return sb.ToString();
         }
         public static string SerializeUTF8StringArray(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as string[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                if (int.TryParse(value[i], out int int32))
+                {
+                    sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i]);
+                }
+                else
+                {
+                    sb.AppendLine(indent + data.Name + "[" + i + "]: \"" + value[i] + "\"");
+                }
+            }
             return sb.ToString();
         }
         public static string SerializeInt32Vector3Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as Int32Vector3[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.Append(indent + data.Name + "[" + i + "]: (");
+                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ")");
+            }
             return sb.ToString();
         }
         public static string SerializeSingleVector3Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as SingleVector3[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.Append(indent + data.Name + "[" + i + "]: (");
+                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ")");
+            }
             return sb.ToString();
         }
         public static string SerializeSingleVector4Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as SingleVector4[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.Append(indent + data.Name + "[" + i + "]: (");
+                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ", " + value[i].D +")");
+            }
             return sb.ToString();
         }
         public static string SerializeSingleVector8Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as SingleVector8[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.Append(indent + data.Name + "[" + i + "]: (");
+                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ") (" + value[i].E + "; " + value[i].F + ", " + value[i].G + ", " + value[i].H + ")");
+            }
             return sb.ToString();
         }
         public static string SerializeSingleVector7Array(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as SingleVector7[];
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.Append(indent + data.Name + "[" + i + "]: (");
+                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ") (" + value[i].D + "; " + value[i].E + ", " + value[i].F + ")");
+            }
             return sb.ToString();
         }
         public static string SerializeBool(ref BSII_DataSegment data, ref string indent)
         {
             bool? value = data.Value as bool? ?? false;
             StringBuilder sb = new StringBuilder();
-            sb.Append(indent);
-            sb.AppendLine(data.Name + ": " + value.ToString().ToLower());
+            sb.AppendLine(indent + data.Name + ": " + value.ToString().ToLower());
             return sb.ToString();
         }
         public static string SerializeEncodedString(ref BSII_DataSegment data, ref string indent)
         {
             string value = data.Value as string;
             StringBuilder sb = new StringBuilder();
-            sb.Append(indent);
-            sb.AppendLine(data.Name + ": \"" + value + "\"");
+            sb.AppendLine(indent + data.Name + ": \"" + value + "\"");
             return sb.ToString();
         }
         public static string SerializeId(ref BSII_DataSegment data, ref string indent)
         {
+            IDComplexType value = data.Value as IDComplexType;
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Value);
             return sb.ToString();
         }
         public static string SerializeInt32(ref BSII_DataSegment data, ref string indent)
         {
+            Int32? value = data.Value as Int32?;
             StringBuilder sb = new StringBuilder();
+            string text = "nil";
+            if(value != null) text = value.ToString();
+            sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
         public static string SerializeInt64(ref BSII_DataSegment data, ref string indent)
         {
+            Int64? value = data.Value as Int64?;
             StringBuilder sb = new StringBuilder();
+            string text = "nil";
+            if (value != null) text = value.ToString();
+            sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
         public static string SerializeUInt32(ref BSII_DataSegment data, ref string indent)
         {
+            Int32? value = data.Value as Int32?;
             StringBuilder sb = new StringBuilder();
+            string text = "nil";
+            if (value != null) text = value.ToString();
+            sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
         public static string SerializeUInt64(ref BSII_DataSegment data, ref string indent)
         {
+            UInt64? value = data.Value as UInt64?;
             StringBuilder sb = new StringBuilder();
+            string text = "nil";
+            if (value != null) text = value.ToString();
+            sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
         public static string SerializeUInt16(ref BSII_DataSegment data, ref string indent)
         {
+            UInt16? value = data.Value as UInt16?;
             StringBuilder sb = new StringBuilder();
+            string text = "nil";
+            if (value != null) text = value.ToString();
+            sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
         public static string SerializeOrdinalString(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as string;
             StringBuilder sb = new StringBuilder();
+            sb.Append(indent + data.Name + ": ");
+            sb.AppendLine("\"" + value + "\"");
             return sb.ToString();
         }
         public static string SerializeSingle(ref BSII_DataSegment data, ref string indent)
         {
+            Single? value = data.Value as Single?;
             StringBuilder sb = new StringBuilder();
+            string text = "nil";
+            if (value != null) text = value.ToString();
+            sb.AppendLine(indent + data.Name + ": " + text);
             return sb.ToString();
         }
         public static string SerializeUTF8String(ref BSII_DataSegment data, ref string indent)
         {
+            var value = data.Value as string;
             StringBuilder sb = new StringBuilder();
+            sb.Append(indent + data.Name + ": ");
+           
+            if (int.TryParse(value, out int int32))
+            {
+                sb.AppendLine(value);
+            }
+            else
+            {
+                sb.AppendLine("\"" + value + "\"");
+            }
+            
             return sb.ToString();
         }
         public static string SerializeSingleVector2(ref BSII_DataSegment data, ref string indent)

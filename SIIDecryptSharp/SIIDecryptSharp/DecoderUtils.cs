@@ -382,7 +382,7 @@ namespace SIIDecryptSharp
             return result;
         }
         //0x37
-        public static Dictionary<UInt32, string> DecodeOrdinalString(ref byte[] bytes, ref int offset)
+        public static Dictionary<UInt32, string> DecodeOrdinalStringList(ref byte[] bytes, ref int offset)
         {
             var length = DecodeUInt32(ref bytes, ref offset);
             Dictionary<uint, string> values = new Dictionary<uint, string>();
@@ -392,6 +392,15 @@ namespace SIIDecryptSharp
                 values.Add(ordinal, DecodeUTF8String(ref bytes, ref offset));
             }
             return values;
+        }
+        public static string GetOrdinalStringFromValues(Dictionary<UInt32, string> values, ref byte[] bytes, ref int offset)
+        {
+            var index = DecodeUInt32(ref bytes, ref offset);
+            if(values.Keys.Contains(index))
+            {
+                return values[index];
+            }
+            return "";
         }
         //0x39, 0x3B, 0x3D
         public static IDComplexType DecodeID(ref byte[] bytes, ref int offset)
@@ -451,6 +460,9 @@ namespace SIIDecryptSharp
                     if (i > 0)
                         result.Value += ".";
                     result.Value += s;
+                }
+                if(result.PartCount == 0) {
+                    result.Value = "null";
                 }
                 
             }

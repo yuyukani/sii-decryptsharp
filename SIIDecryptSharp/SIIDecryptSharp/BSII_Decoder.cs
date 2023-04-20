@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Schema;
 
 namespace SIIDecryptSharp
 {
@@ -82,12 +83,14 @@ namespace SIIDecryptSharp
     {
         public BSII_Header Header { get; set; }
         public List<BSII_StructureBlock> Blocks { get; set; }
+        public List<BSII_StructureBlock> DecodedBlocks { get; set; }
 
         public BSII_Data()
         {
 
             Header = new BSII_Header();
             Blocks = new List<BSII_StructureBlock>();
+            DecodedBlocks = new List<BSII_StructureBlock>();
         }
     }
     public class BSII_Header
@@ -98,6 +101,7 @@ namespace SIIDecryptSharp
 
     public class BSII_StructureBlock
     {
+        private static int _uniqueId = 0;
         public UInt32 Type { get; set; }
         public UInt32 StructureId { get; set; }
 
@@ -106,6 +110,7 @@ namespace SIIDecryptSharp
 
         public List<BSII_DataSegment> Segments { get; set; }
 
+        private int uId = _uniqueId++;
         public BSII_StructureBlock()
         {
             Segments = new List<BSII_DataSegment>();
@@ -148,6 +153,7 @@ namespace SIIDecryptSharp
             BSII_StructureBlock currentBlock = new BSII_StructureBlock();
             UInt32 blockType = 0;
             List<Tuple<uint, string>> blocks = new List<Tuple<uint, string>>();
+            Dictionary<uint, Dictionary<UInt32, string>> ordinalLists = new Dictionary<uint, Dictionary<UInt32, string>>();
             do
             {
                 blockType = BSII_Type_Decoder.DecodeUInt32(ref bytes, ref streamPos);
@@ -172,60 +178,62 @@ namespace SIIDecryptSharp
                     while (segment.Type != 0)
                     {
                         segment = ReadDataBlock(ref bytes, ref streamPos);
+                        if(segment.Type == (uint)DataTypeIdFormat.OrdinalString && !ordinalLists.ContainsKey(currentBlock.StructureId))
+                        {
+                            ordinalLists[currentBlock.StructureId] = segment.Value as Dictionary<UInt32, string>;
+                        }
                         currentBlock.Segments.Add(segment);
+
                     }
-                    fileData.Blocks.Add(currentBlock);
-                    blocks.Add(new Tuple<uint, string>(currentBlock.StructureId, currentBlock.Name));
-                    Debug.WriteLine("Done reading segments in struct id: " + currentBlock.StructureId.ToString());
+                    if (!fileData.Blocks.Any(x => x.StructureId == currentBlock.StructureId))
+                    {
+                        fileData.Blocks.Add(currentBlock);
+                    }
+                    
                 }
                 else
                 {
-                    var blockData = fileData.Blocks.Where(x => x.StructureId == blockType).First();
-                    LoadDataBlockLocal(ref bytes, ref streamPos, ref blockData, fileData.Header.Version);
-                    fileData.Blocks.RemoveAll(x => x.StructureId == blockType);
-                    fileData.Blocks.Add(blockData);
-                }
-            } while (streamPos < bytes.Length);
+                    var blockDataItem = fileData.Blocks.Where(x => x.StructureId == blockType).First();
+                    var blockData = new BSII_StructureBlock();
+                    blockData.StructureId = blockDataItem.StructureId;
+                    blockData.Name = blockDataItem.Name;
+                    blockData.Type = blockDataItem.Type;
+                    blockData.Validity = blockDataItem.Validity;
+                    blockData.Segments = new List<BSII_DataSegment>();
+                    foreach ( var segment in blockDataItem.Segments )
+                    {
+                        blockData.Segments.Add(new BSII_DataSegment()
+                        {
+                            Name = segment.Name,
+                            Type = segment.Type,
+                            Value = segment.Value,
+                        });
+                    }
+                    if (blockDataItem.ID != null)
+                    {
+                        blockData.ID = new IDComplexType()
+                        {
+                            Address = blockDataItem.ID.Address,
+                            PartCount = blockDataItem.ID.PartCount,
+                            Value = blockDataItem.ID.Value,
+                        };
+                    }
+                    //fileData.Blocks.Remove(blockData);
+                    Dictionary<UInt32, string> list = new Dictionary<UInt32, string>();
 
-            Debug.WriteLine("DECODED!");
+                    if(ordinalLists.ContainsKey(blockData.StructureId)) list = ordinalLists[blockData.StructureId];
+                    LoadDataBlockLocal(ref bytes, ref streamPos, ref blockData, fileData.Header.Version, ref list);
+                    fileData.DecodedBlocks.Add(blockData);
+                    
+                }
+                
+            } while (streamPos < bytes.Length);
 
             return BSII_Serializer.Serialize(ref fileData);
 
         }
 
-        private static bool LoadStructureBlockLocal(ref byte[] bytes, ref int streamPos, out BSII_StructureBlock block)
-        {
-            block = new BSII_StructureBlock();
-            block.Type = 0;
-            block.Validity = StreamUtils.ReadBool(ref bytes, ref streamPos);
-            if (!block.Validity) return false;
-
-            block.StructureId = StreamUtils.ReadUInt32(ref bytes, ref streamPos);
-
-            if (block.StructureId == 0) throw new Exception("Invalid block id");
-
-            block.Name = StreamUtils.ReadChars(ref bytes, ref streamPos);
-
-            UInt32 ValueType = 0;
-            do
-            {
-                ValueType = StreamUtils.ReadUInt32(ref bytes, ref streamPos);
-                if (ValueType == 0) break;
-
-                BSII_DataSegment segment = new BSII_DataSegment();
-                segment.Type = ValueType;
-                segment.Name = StreamUtils.ReadChars(ref bytes, ref streamPos);
-                if(segment.Type == 0x37)
-                {
-                    segment.Value = StreamUtils.ReadUInt32(ref bytes, ref streamPos);
-                }
-                block.Segments.Add(segment);
-
-            } while (ValueType != 0);
-            return true;
-        }
-
-        private static bool LoadDataBlockLocal(ref byte[] bytes, ref int streamPos, ref BSII_StructureBlock segment, uint formatVersion)
+        private static bool LoadDataBlockLocal(ref byte[] bytes, ref int streamPos, ref BSII_StructureBlock segment, uint formatVersion, ref Dictionary<UInt32,string> values)
         {
             segment.ID = BSII_Type_Decoder.DecodeID(ref bytes, ref streamPos);
 
@@ -309,7 +317,7 @@ namespace SIIDecryptSharp
                         segment.Segments[i].Value = BSII_Type_Decoder.DecodeUInt16(ref bytes, ref streamPos);
                         break;
                     case (int)DataTypeIdFormat.OrdinalString:
-                        segment.Segments[i].Value = BSII_Type_Decoder.DecodeOrdinalString(ref bytes, ref streamPos);
+                        segment.Segments[i].Value = BSII_Type_Decoder.GetOrdinalStringFromValues(values, ref bytes, ref streamPos); ;
                         break;
                     case (int)DataTypeIdFormat.Single:
                         segment.Segments[i].Value = BSII_Type_Decoder.DecodeSingle(ref bytes, ref streamPos);
@@ -351,26 +359,6 @@ namespace SIIDecryptSharp
             return true;
         }
 
-        private static dynamic LoadDataBlockId(ref byte[] bytes, ref int streamPos)
-        {
-            var IDLength = StreamUtils.ReadUInt8(ref bytes, ref streamPos);
-            if(IDLength == 0xFF)//0xFF
-            {
-                var id = BSII_Type_Decoder.DecodeUInt64(ref bytes, ref streamPos);
-                return id;
-            }
-            else
-            {
-                List<string> parts = new List<string>();
-                for(int i = 0; i < IDLength; i++)
-                {
-                    parts.Add(BSII_Type_Decoder.DecodeUInt64String(ref bytes, ref streamPos));
-                }
-                return parts.ToArray();
-            }
-            
-        }
-        
         private static BSII_DataSegment ReadDataBlock(ref byte[] bytes, ref int streamPos)
         {
             var result = new BSII_DataSegment();
@@ -382,8 +370,8 @@ namespace SIIDecryptSharp
             //IF THE TYPE IS 55
             if(result.Type == (uint)DataTypeIdFormat.OrdinalString)
             {
-                //READ THE ORDINAL STRING NOW
-                result.Value = BSII_Type_Decoder.DecodeOrdinalString(ref bytes, ref streamPos);
+                //READ THE ORDINAL STRING LIST NOW
+                result.Value = BSII_Type_Decoder.DecodeOrdinalStringList(ref bytes, ref streamPos);
             }
             return result;
         }

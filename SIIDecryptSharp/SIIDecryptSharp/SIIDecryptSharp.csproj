@@ -22,7 +22,7 @@
     <SignAssembly>False</SignAssembly>
     <AssemblyVersion></AssemblyVersion>
     <FileVersion></FileVersion>
-    <Version>1.0.0-alpha3</Version>
+    <Version>1.0.0-alpha4</Version>
   </PropertyGroup>
 
   <ItemGroup>

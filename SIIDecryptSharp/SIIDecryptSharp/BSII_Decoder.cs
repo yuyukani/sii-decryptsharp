@@ -51,9 +51,9 @@ namespace SIIDecryptSharp
         UInt32=0x27,
         //Array of UInt32
         ArrayOfUInt32=0x28,
-        //signed 16 bit integer
+        //signed 16 bit integer //EXPERIMENTAL
         Int16=0x29,
-        //Array of 16 bit signed integers (array of type 0x29)
+        //Array of 16 bit signed integers (array of type 0x29) //EXPERIMENTAL
         ArrayOfInt16=0x2A,
         //Unsigned 16 bit integer
         UInt16=0x2B,

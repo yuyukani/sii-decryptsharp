@@ -346,6 +346,17 @@ namespace SIIDecryptSharp
             offset += sizeof(Int64);
             return result;
         }
+        //0x32
+        public static Int64[] DecodeInt64Array(ref byte[] bytes, ref int offset)
+        {
+            var numberOfInts = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var result = new Int64[numberOfInts];
+            for (int i = 0; i < numberOfInts; i++)
+            {
+                result[i] = DecodeInt64(ref bytes, ref offset);
+            }
+            return result;
+        }
         //0x33
         public static UInt64 DecodeUInt64(ref byte[] bytes, ref int offset)
         {

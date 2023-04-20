@@ -57,6 +57,8 @@ namespace SIIDecryptSharp
         UInt32Type2=0x2F,
         //64 bit signed integer
         Int64=0x31,
+        //Array of 64-bit signed integer (array of type 0x31)
+        ArrayOfInt64=0x32,
         //64 bit unsigned integer
         UInt64=0x33,
         //Array of 64 bit unsigned integers (array of type 0x33)
@@ -344,6 +346,9 @@ namespace SIIDecryptSharp
                         {
                             segment.Segments[i].Value = BSII_Type_Decoder.DecodeSingleVector8(ref bytes, ref streamPos);
                         }
+                        break;
+                    case (int)DataTypeIdFormat.ArrayOfInt64:
+                        segment.Segments[i].Value = BSII_Type_Decoder.DecodeInt64Array(ref bytes, ref streamPos);
                         break;
                     case 0:
                         continue;

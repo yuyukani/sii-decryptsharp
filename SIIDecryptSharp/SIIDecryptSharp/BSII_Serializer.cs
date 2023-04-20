@@ -137,6 +137,9 @@ namespace SIIDecryptSharp
                                     sb.Append(SerializeSingleVector8(ref segment, ref indent));
                                 }
                                 break;
+                            case (int)DataTypeIdFormat.ArrayOfInt64:
+                                sb.Append(SerializeInt64Array(ref segment, ref indent));
+                                break;
                             case 0:
                             default:
                                 break;
@@ -524,6 +527,17 @@ namespace SIIDecryptSharp
         public static string SerializeSingleVector7(ref BSII_DataSegment data, ref string indent)
         {
             StringBuilder sb = new StringBuilder();
+            return sb.ToString();
+        }
+        public static string SerializeInt64Array(ref BSII_DataSegment data, ref string indent)
+        {
+            var value = data.Value as Int64[];
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+            }
             return sb.ToString();
         }
 

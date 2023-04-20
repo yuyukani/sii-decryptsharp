@@ -25,6 +25,8 @@ namespace SIIDecryptSharp
         ArrayOfSingle=0x06,
         //2 4 byte floats
         VectorOf2Single=0x07,
+        //Array of vectors of 2 4 byte floats (array of type 0x07) //EXPERIMENTAL
+        ArrayOfVectorOf2Single=0x08,
         //3 4 byte floats
         VectorOf3Single=0x09,
         //Array of vectors of 3 4 byte floats (array of type 0x9)
@@ -49,6 +51,10 @@ namespace SIIDecryptSharp
         UInt32=0x27,
         //Array of UInt32
         ArrayOfUInt32=0x28,
+        //signed 16 bit integer
+        Int16=0x29,
+        //Array of 16 bit signed integers (array of type 0x29)
+        ArrayOfInt16=0x2A,
         //Unsigned 16 bit integer
         UInt16=0x2B,
         //Array of UInt16
@@ -57,7 +63,7 @@ namespace SIIDecryptSharp
         UInt32Type2=0x2F,
         //64 bit signed integer
         Int64=0x31,
-        //Array of 64-bit signed integer (array of type 0x31)
+        //Array of 64-bit signed integer (array of type 0x31) //EXPERIMENTAL
         ArrayOfInt64=0x32,
         //64 bit unsigned integer
         UInt64=0x33,
@@ -78,7 +84,9 @@ namespace SIIDecryptSharp
         //Id Complex type
         IdType2=0x3B,
         //Id complex type
-        IdType3=0x3D
+        IdType3=0x3D,
+        //Array of Id //EXPERIMENTAL
+        ArrayOfIdE=0x3E,
     }
     
     public class BSII_Data
@@ -250,6 +258,7 @@ namespace SIIDecryptSharp
                         break;
                     case (int)DataTypeIdFormat.ArrayOfIdA:
                     case (int)DataTypeIdFormat.ArrayOfIdC:
+                    case (int)DataTypeIdFormat.ArrayOfIdE:
                         segment.Segments[i].Value = BSII_Type_Decoder.DecodeIDArray(ref bytes, ref streamPos);
                         break;
                     case (int)DataTypeIdFormat.ArrayOfInt32:
@@ -349,6 +358,15 @@ namespace SIIDecryptSharp
                         break;
                     case (int)DataTypeIdFormat.ArrayOfInt64:
                         segment.Segments[i].Value = BSII_Type_Decoder.DecodeInt64Array(ref bytes, ref streamPos);
+                        break;
+                    case (int)DataTypeIdFormat.ArrayOfInt16:
+                        segment.Segments[i].Value = BSII_Type_Decoder.DecodeInt16Array(ref bytes, ref streamPos);
+                        break;
+                    case (int)DataTypeIdFormat.Int16:
+                        segment.Segments[i].Value = BSII_Type_Decoder.DecodeInt16(ref bytes, ref streamPos);
+                        break;
+                    case (int)DataTypeIdFormat.ArrayOfVectorOf2Single:
+                        segment.Segments[i].Value = BSII_Type_Decoder.DecodeSingleVector2Array(ref bytes, ref streamPos);
                         break;
                     case 0:
                         continue;

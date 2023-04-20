@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="game.1.47.0.sii" />
     <None Remove="game.1.47.sii" />
   </ItemGroup>
 
@@ -19,6 +18,12 @@
   <ItemGroup>
     <None Update="game.1.46.sii">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="game.1.47.0.sii">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="game.1.47.2.sii">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="info.sii">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

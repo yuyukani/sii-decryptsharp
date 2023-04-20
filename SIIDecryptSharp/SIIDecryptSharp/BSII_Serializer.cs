@@ -40,6 +40,7 @@ namespace SIIDecryptSharp
                                 break;
                             case (int)DataTypeIdFormat.ArrayOfIdA:
                             case (int)DataTypeIdFormat.ArrayOfIdC:
+                            case (int)DataTypeIdFormat.ArrayOfIdE:
                                 sb.Append(SerializeIDArray(ref segment, ref indent));
                                 break;
                             case (int)DataTypeIdFormat.ArrayOfInt32:
@@ -139,6 +140,15 @@ namespace SIIDecryptSharp
                                 break;
                             case (int)DataTypeIdFormat.ArrayOfInt64:
                                 sb.Append(SerializeInt64Array(ref segment, ref indent));
+                                break;
+                            case (int)DataTypeIdFormat.ArrayOfVectorOf2Single:
+                                sb.Append(SerializeSingleVector2Array(ref segment, ref indent));
+                                break;
+                            case (int)DataTypeIdFormat.Int16:
+                                sb.Append(SerializeInt16(ref segment, ref indent));
+                                break;
+                            case (int)DataTypeIdFormat.ArrayOfInt16:
+                                sb.Append(SerializeInt16Array(ref segment, ref indent));
                                 break;
                             case 0:
                             default:
@@ -302,7 +312,7 @@ namespace SIIDecryptSharp
             for (int i = 0; i < value.Length; i++)
             {
                 sb.Append(indent + data.Name + "[" + i + "]: (");
-                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ")");
+                sb.AppendLine(SerializeSingle(value[i].A) + ", " + SerializeSingle(value[i].B) + ", " + SerializeSingle(value[i].C) + ")");
             }
             return sb.ToString();
         }
@@ -314,7 +324,19 @@ namespace SIIDecryptSharp
             for (int i = 0; i < value.Length; i++)
             {
                 sb.Append(indent + data.Name + "[" + i + "]: (");
-                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ")");
+                sb.AppendLine(SerializeSingle(value[i].A) + ", " + SerializeSingle(value[i].B) + ", " + SerializeSingle(value[i].C) + ")");
+            }
+            return sb.ToString();
+        }
+        public static string SerializeSingleVector2Array(ref BSII_DataSegment data, ref string indent)
+        {
+            var value = data.Value as SingleVector2[];
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.Append(indent + data.Name + "[" + i + "]: (");
+                sb.AppendLine(SerializeSingle(value[i].A) + ", " + SerializeSingle(value[i].B) + ")");
             }
             return sb.ToString();
         }
@@ -326,7 +348,7 @@ namespace SIIDecryptSharp
             for (int i = 0; i < value.Length; i++)
             {
                 sb.Append(indent + data.Name + "[" + i + "]: (");
-                sb.AppendLine(value[i].A + "; " + value[i].B + ", " + value[i].C + ", " + value[i].D +")");
+                sb.AppendLine(SerializeSingle(value[i].A) + "; " + SerializeSingle(value[i].B) + ", " + SerializeSingle(value[i].C) + ", " + SerializeSingle(value[i].D) +")");
             }
             return sb.ToString();
         }
@@ -338,7 +360,8 @@ namespace SIIDecryptSharp
             for (int i = 0; i < value.Length; i++)
             {
                 sb.Append(indent + data.Name + "[" + i + "]: (");
-                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ") (" + value[i].E + "; " + value[i].F + ", " + value[i].G + ", " + value[i].H + ")");
+                sb.AppendLine(SerializeSingle(value[i].A) + ", " + SerializeSingle(value[i].B) + ", " + SerializeSingle(value[i].C) + ") (" +
+                    SerializeSingle(value[i].E) + "; " + SerializeSingle(value[i].F) + ", " + SerializeSingle(value[i].G) + ", " + SerializeSingle(value[i].H) + ")");
             }
             return sb.ToString();
         }
@@ -350,7 +373,7 @@ namespace SIIDecryptSharp
             for (int i = 0; i < value.Length; i++)
             {
                 sb.Append(indent + data.Name + "[" + i + "]: (");
-                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ") (" + value[i].D + "; " + value[i].E + ", " + value[i].F + ")");
+                sb.AppendLine(SerializeSingle(value[i].A) + ", " + SerializeSingle(value[i].B) + ", " + SerializeSingle(value[i].C) + ") (" + SerializeSingle(value[i].D) + "; " + SerializeSingle(value[i].E) + ", " + SerializeSingle(value[i].F) + ")");
             }
             return sb.ToString();
         }
@@ -432,29 +455,32 @@ namespace SIIDecryptSharp
             sb.AppendLine(value);
             return sb.ToString();
         }
+
+        public static string SerializeInt16Array(ref BSII_DataSegment data, ref string indent)
+        {
+            var value = data.Value as Int16[];
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": " + value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i].ToString());
+            }
+            return sb.ToString();
+        }
+        public static string SerializeInt16(ref BSII_DataSegment data, ref string indent)
+        {
+            Int16? value = data.Value as Int16?;
+            StringBuilder sb = new StringBuilder();
+            string text = "nil";
+            if (value != null && value != 32767) text = value.ToString();
+            sb.AppendLine(indent + data.Name + ": " + text);
+            return sb.ToString();
+        }
         public static string SerializeSingle(ref BSII_DataSegment data, ref string indent)
         {
             Single? value = data.Value as Single?;
             StringBuilder sb = new StringBuilder();
-            string text = "nil";
-            if (value.HasValue)
-            {
-                if(value.Value - Math.Truncate(value.Value) != 0.00f || value.Value >= 1e7) 
-                {
-                    text = "";
-                    var bytes = BitConverter.GetBytes(value.Value);
-                    foreach(byte b in bytes)
-                    {
-                        text = b.ToString("x2") + text;
-                    }
-                    text = "&" + text;
-                }
-                else
-                {
-                    text = ((int)value.Value).ToString("f0");
-                }
-            }
-            sb.AppendLine(indent + data.Name + ": " + text);
+            sb.AppendLine(indent + data.Name + ": " + SerializeSingle(value));
             return sb.ToString();
         }
         public static string SerializeUTF8String(ref BSII_DataSegment data, ref string indent)
@@ -527,6 +553,9 @@ namespace SIIDecryptSharp
         public static string SerializeSingleVector7(ref BSII_DataSegment data, ref string indent)
         {
             StringBuilder sb = new StringBuilder();
+            SingleVector7 vector = data.Value as SingleVector7;
+            sb.AppendLine(indent + data.Name + ": (" + SerializeSingle(vector.A) + ", " + SerializeSingle(vector.B) + ", " + SerializeSingle(vector.C) + ") (" +
+                SerializeSingle(vector.D) + "; " + SerializeSingle(vector.E) + ", " + SerializeSingle(vector.F) + ", " + SerializeSingle(vector.G) + ")");
             return sb.ToString();
         }
         public static string SerializeInt64Array(ref BSII_DataSegment data, ref string indent)

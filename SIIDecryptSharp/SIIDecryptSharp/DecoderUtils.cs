@@ -93,9 +93,9 @@ namespace SIIDecryptSharp
         //0x02
         public static string[] DecodeUTF8StringArray(ref byte[] bytes, ref int offset)
         {
-            var numberOfStrings = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfStrings = DecodeUInt32(ref bytes, ref offset);
             var result = new string[numberOfStrings];
-            for(int i = 0; i < numberOfStrings; i++)
+            for(uint i = 0; i < numberOfStrings; i++)
             {
                 result[i] = DecodeUTF8String(ref bytes, ref offset);
             }
@@ -123,9 +123,9 @@ namespace SIIDecryptSharp
         //0x04
         public static string[] DecodeUInt64StringArray(ref byte[] bytes, ref int offset)
         {
-            var numberOfStrings = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfStrings = DecodeUInt32(ref bytes, ref offset);
             var result = new string[numberOfStrings];
-            for(int i = 0; i < numberOfStrings; i++)
+            for(uint i = 0; i < numberOfStrings; i++)
             {
                 result[i] = DecodeUInt64String(ref bytes, ref offset);
             }
@@ -141,9 +141,9 @@ namespace SIIDecryptSharp
         //0x06
         public static Single[] DecodeSingleArray(ref byte[] bytes, ref int offset)
         {
-            var numberOfSingles = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfSingles = DecodeUInt32(ref bytes, ref offset);
             var result = new Single[numberOfSingles];
-            for(int i = 0; i < numberOfSingles; i++)
+            for(uint i = 0; i < numberOfSingles; i++)
             {
                 result[i] = DecodeSingle(ref bytes, ref offset);
             }
@@ -157,6 +157,19 @@ namespace SIIDecryptSharp
             result.B = DecodeSingle(ref bytes, ref offset);
             return result;
         }
+
+        //0x08
+        public static SingleVector2[] DecodeSingleVector2Array(ref byte[] bytes, ref int offset)
+        {
+            var numberOfVector2s = DecodeUInt32(ref bytes, ref offset);
+            var result = new SingleVector2[numberOfVector2s];
+            for (uint i = 0; i < numberOfVector2s; i++)
+            {
+                result[i] = DecodeSingleVector2(ref bytes, ref offset);
+            }
+            return result;
+        }
+
         //0x09
         public static SingleVector3 DecodeSingleVector3(ref byte[] bytes, ref int offset)
         {
@@ -169,9 +182,9 @@ namespace SIIDecryptSharp
         //0x0A
         public static SingleVector3[] DecodeSingleVector3Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfVector3s = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfVector3s = DecodeUInt32(ref bytes, ref offset);
             var result = new SingleVector3[numberOfVector3s];
-            for(int i = 0; i < numberOfVector3s; i++)
+            for(uint i = 0; i < numberOfVector3s; i++)
             {
                 result[i] = DecodeSingleVector3(ref bytes, ref offset);
             }
@@ -189,9 +202,9 @@ namespace SIIDecryptSharp
         //0x12
         public static Int32Vector3[] DecodeInt32Vector3Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfVector3s = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfVector3s = DecodeUInt32(ref bytes, ref offset);
             var result = new Int32Vector3[numberOfVector3s];
-            for(int i = 0; i < numberOfVector3s; i++)
+            for(uint i = 0; i < numberOfVector3s; i++)
             {
                 result[i] = DecodeInt32Vector3(ref bytes, ref offset);
             }
@@ -211,7 +224,6 @@ namespace SIIDecryptSharp
         public static SingleVector4[] DecodeSingleVector4Array(ref byte[] bytes, ref int offset)
         {
             var number = DecodeUInt32(ref bytes, ref offset);
-            //var numberOfVector4s = Convert.ToInt32(number);
             var result = new SingleVector4[number];
             for (uint i = 0; i < number; i++)
             {
@@ -264,9 +276,9 @@ namespace SIIDecryptSharp
         //0x1A
         public static SingleVector7[] DecodeSingleVector7Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfVector7s = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfVector7s = DecodeUInt32(ref bytes, ref offset);
             var result = new SingleVector7[numberOfVector7s];
-            for (int i = 0; i < numberOfVector7s; i++)
+            for (uint i = 0; i < numberOfVector7s; i++)
             {
                 result[i] = DecodeSingleVector7(ref bytes, ref offset);
             }
@@ -274,9 +286,9 @@ namespace SIIDecryptSharp
         }
         public static SingleVector8[] DecodeSingleVector8Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfVector8s = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfVector8s = DecodeUInt32(ref bytes, ref offset);
             var result = new SingleVector8[numberOfVector8s];
-            for (int i = 0; i < numberOfVector8s; i++)
+            for (uint i = 0; i < numberOfVector8s; i++)
             {
                 result[i] = DecodeSingleVector8(ref bytes, ref offset);
             }
@@ -294,9 +306,9 @@ namespace SIIDecryptSharp
         //0x26
         public static Int32[] DecodeInt32Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfInts = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfInts = DecodeUInt32(ref bytes, ref offset);
             var result = new Int32[numberOfInts];
-            for(int i = 0; i < numberOfInts; i++)
+            for(uint i = 0; i < numberOfInts; i++)
             {
                 result[i] = DecodeInt32(ref bytes, ref offset);
             }
@@ -312,11 +324,29 @@ namespace SIIDecryptSharp
         //0x28
         public static UInt32[] DecodeUInt32Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfInts = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfInts = DecodeUInt32(ref bytes, ref offset);
             var result = new UInt32[numberOfInts];
-            for (int i = 0; i < numberOfInts; i++)
+            for (uint i = 0; i < numberOfInts; i++)
             {
                 result[i] = DecodeUInt32(ref bytes, ref offset);
+            }
+            return result;
+        }
+        //0x29
+        public static Int16 DecodeInt16(ref byte[] bytes, ref int offset)
+        {
+            Int16 result = BitConverter.ToInt16(bytes, offset);
+            offset += sizeof(Int16);
+            return result;
+        }
+        //0x2A
+        public static Int16[] DecodeInt16Array(ref byte[] bytes, ref int offset)
+        {
+            var numberOfInts = DecodeUInt32(ref bytes, ref offset);
+            var result = new Int16[numberOfInts];
+            for (uint i = 0; i < numberOfInts; i++)
+            {
+                result[i] = DecodeInt16(ref bytes, ref offset);
             }
             return result;
         }
@@ -331,9 +361,9 @@ namespace SIIDecryptSharp
         //0x2C
         public static UInt16[] DecodeUInt16Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfInts = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfInts = DecodeUInt32(ref bytes, ref offset);
             var result = new UInt16[numberOfInts];
-            for (int i = 0; i < numberOfInts; i++)
+            for (uint i = 0; i < numberOfInts; i++)
             {
                 result[i] = DecodeUInt16(ref bytes, ref offset);
             }
@@ -349,9 +379,9 @@ namespace SIIDecryptSharp
         //0x32
         public static Int64[] DecodeInt64Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfInts = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfInts = DecodeUInt32(ref bytes, ref offset);
             var result = new Int64[numberOfInts];
-            for (int i = 0; i < numberOfInts; i++)
+            for (uint i = 0; i < numberOfInts; i++)
             {
                 result[i] = DecodeInt64(ref bytes, ref offset);
             }
@@ -367,9 +397,9 @@ namespace SIIDecryptSharp
         //0x34
         public static UInt64[] DecodeUInt64Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfInts = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfInts = DecodeUInt32(ref bytes, ref offset);
             var result = new UInt64[numberOfInts];
-            for (int i = 0; i < numberOfInts; i++)
+            for (uint i = 0; i < numberOfInts; i++)
             {
                 result[i] = DecodeUInt64(ref bytes, ref offset);
             }
@@ -385,9 +415,9 @@ namespace SIIDecryptSharp
         //0x36
         public static bool[] DecodeBoolArray(ref byte[] bytes, ref int offset)
         {
-            var numberOfBools = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfBools = DecodeUInt32(ref bytes, ref offset);
             var result = new bool[numberOfBools];
-            for (int i = 0; i < numberOfBools; i++)
+            for (uint i = 0; i < numberOfBools; i++)
             {
                 result[i] = DecodeBool(ref bytes, ref offset);
             }
@@ -398,7 +428,7 @@ namespace SIIDecryptSharp
         {
             var length = DecodeUInt32(ref bytes, ref offset);
             Dictionary<uint, string> values = new Dictionary<uint, string>();
-            for (int i = 0; i < length; i++)
+            for (uint i = 0; i < length; i++)
             {
                 var ordinal = DecodeUInt32(ref bytes, ref offset);
                 values.Add(ordinal, DecodeUTF8String(ref bytes, ref offset));
@@ -484,96 +514,16 @@ namespace SIIDecryptSharp
             }
             return result;
         }
-        //0x3A, 0x3C
+        //0x3A, 0x3C, 0x3E
         public static IDComplexType[] DecodeIDArray(ref byte[] bytes, ref int offset)
         {
-            var numberOfIds = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var numberOfIds = DecodeUInt32(ref bytes, ref offset);
             var result = new IDComplexType[numberOfIds];
-            for(int i = 0; i < numberOfIds; i++)
+            for(uint i = 0; i < numberOfIds; i++)
             {
                 result[i] = DecodeID(ref bytes, ref offset);
             }
             return result;
         }
     }
-    /*public class BSII_Decoder_Format1 : IBSII_Decoder
-    {
-        //0x01
-        public string DecodeUTF8String(ref byte[] bytes, ref int offset)
-        {
-            string result = string.Empty;
-            result = StreamUtils.ReadChars(ref bytes, ref offset);
-            return result;
-        }
-
-        //0x02
-        public string[] DecodeUTF8StringArray(ref byte[] bytes, ref int offset)
-        {
-            List<string> result = new List<string>();
-            var numberOfStrings = StreamUtils.ReadUInt32(ref bytes, ref offset);
-            for(uint i = 0; i < numberOfStrings; i++)
-            {
-                result.Add(StreamUtils.ReadChars(ref bytes, ref offset));
-            }
-            return result.ToArray();
-        }
-
-        //0x03
-        public string DecodeUInt64String(ref byte[] bytes, ref int offset)
-        {
-            string result = "";
-            var value = StreamUtils.ReadUInt32(ref bytes, ref offset);
-            var valueBytes = BitConverter.GetBytes(value);
-            valueBytes = valueBytes.Take(valueBytes.Length - 1).ToArray();
-            var realValue = BitConverter.ToUInt64(valueBytes, 0);
-            while (realValue != 0)
-            {
-                var modulus = (decimal)(realValue % 38);
-                var charIdx = (int)Math.Abs(modulus);
-                realValue = (UInt64)(realValue / 38);
-                if (charIdx > -1 && charIdx < 38)
-                {
-                    result += BSIIUtils.CharTable[charIdx];
-                }
-            }
-            return result;
-        }
-        //0x04
-        public string[] DecodeUInt64StringArray(ref byte[] bytes, ref int offset)
-        {
-            var result = new List<string>();
-            var numberOfStrings = StreamUtils.ReadUInt32(ref bytes, ref offset);
-            for(uint i = 0; i < numberOfStrings; i++)
-            {
-                result.Add(DecodeUInt64String(ref bytes, ref offset));
-            }
-            return result.ToArray();
-        }
-        //0x05
-        public float DecodeFloat(ref byte[] bytes, ref int offset)
-        {
-            return StreamUtils.ReadFloat(ref bytes, ref offset);
-        }
-        //0x06
-        public float[] DecodeFloatArray(ref byte[] bytes, ref int offset)
-        {
-            var result = new List<float>();
-            var numberOfFloats = StreamUtils.ReadUInt32(ref bytes, ref offset);
-            for(uint i = 0; i < numberOfFloats; i++)
-            {
-                result.Add(StreamUtils.ReadFloat(ref bytes, ref offset));
-            }
-            return result.ToArray();
-        }
-
-    }
-
-    public class BSII_Decoder_Format2: BSII_Decoder_Format1
-    {
-
-    }
-    public class BSII_Decoder_Format3 : BSII_Decoder_Format2
-    {
-
-    }*/
 }

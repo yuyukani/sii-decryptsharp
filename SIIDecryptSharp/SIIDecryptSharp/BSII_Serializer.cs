@@ -147,7 +147,7 @@ namespace SIIDecryptSharp
                 
 
             }
-            sb.AppendLine("}");
+            sb.Append("}");
             return System.Text.Encoding.UTF8.GetBytes(sb.ToString());
         }
 
@@ -170,16 +170,7 @@ namespace SIIDecryptSharp
             sb.AppendLine(indent + data.Name + ": " + value.Length);
             for(int i = 0; i < value.Length; i ++)
             {
-                if (int.TryParse(value[i], out int int32))
-                {
-                    sb.AppendLine(indent + data.Name + "[" + i +"]: " + value[i]);
-                }
-                else
-                {
-                    //visited_cities array has no quotes
-                    sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i] + "");
-                }
-                
+                sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i]);   
             }
             return sb.ToString();
         }
@@ -496,27 +487,38 @@ namespace SIIDecryptSharp
         }
         public static string SerializeSingleVector2(ref BSII_DataSegment data, ref string indent)
         {
+            SingleVector2 vector = data.Value as SingleVector2;
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": (" + SerializeSingle(vector.A) + ", " + SerializeSingle(vector.B) + ")");
             return sb.ToString();
         }
         public static string SerializeSingleVector3(ref BSII_DataSegment data, ref string indent)
         {
+            SingleVector3 vector = data.Value as SingleVector3;
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": (" + SerializeSingle(vector.A) + ", " + SerializeSingle(vector.B) + ", " + SerializeSingle(vector.C) +")");
             return sb.ToString();
         }
         public static string SerializeSingleVector4(ref BSII_DataSegment data, ref string indent)
         {
+            SingleVector4 vector = data.Value as SingleVector4;
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": (" + SerializeSingle(vector.A) + ", " + SerializeSingle(vector.B) + ", " + SerializeSingle(vector.C) + ", " + SerializeSingle(vector.D) + ")");
             return sb.ToString();
         }
         public static string SerializeInt32Vector3(ref BSII_DataSegment data, ref string indent)
         {
+            Int32Vector3 vector = data.Value as Int32Vector3;
             StringBuilder sb = new StringBuilder();
+            sb.AppendLine(indent + data.Name + ": (" + vector.A + ", " + vector.B + ", " + vector.C + ")");
             return sb.ToString();
         }
         public static string SerializeSingleVector8(ref BSII_DataSegment data, ref string indent)
         {
             StringBuilder sb = new StringBuilder();
+            SingleVector8 vector = data.Value as SingleVector8;
+            sb.AppendLine(indent + data.Name + ": (" + SerializeSingle(vector.A) + ", " + SerializeSingle(vector.B) + ", " + SerializeSingle(vector.C) + ") (" +
+                SerializeSingle(vector.E) + "; " + SerializeSingle(vector.F) + ", " + SerializeSingle(vector.G) + ", " + SerializeSingle(vector.H) + ")");
             return sb.ToString();
         }
         public static string SerializeSingleVector7(ref BSII_DataSegment data, ref string indent)
@@ -537,5 +539,27 @@ namespace SIIDecryptSharp
             'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
             'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '_'
         };
+        public static string SerializeSingle(Single? single)
+        {
+            string text = "nil";
+            if (single.HasValue)
+            {
+                if (single.Value - Math.Truncate(single.Value) != 0.00f || single.Value >= 1e7)
+                {
+                    text = "";
+                    var bytes = BitConverter.GetBytes(single.Value);
+                    foreach (byte b in bytes)
+                    {
+                        text = b.ToString("x2") + text;
+                    }
+                    text = "&" + text;
+                }
+                else
+                {
+                    text = ((int)single.Value).ToString("f0");
+                }
+            }
+            return text;
+        }
     }
 }

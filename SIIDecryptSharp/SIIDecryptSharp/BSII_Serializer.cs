@@ -323,7 +323,7 @@ namespace SIIDecryptSharp
             for (int i = 0; i < value.Length; i++)
             {
                 sb.Append(indent + data.Name + "[" + i + "]: (");
-                sb.AppendLine(value[i].A + ", " + value[i].B + ", " + value[i].C + ", " + value[i].D +")");
+                sb.AppendLine(value[i].A + "; " + value[i].B + ", " + value[i].C + ", " + value[i].D +")");
             }
             return sb.ToString();
         }
@@ -503,7 +503,7 @@ namespace SIIDecryptSharp
         {
             SingleVector4 vector = data.Value as SingleVector4;
             StringBuilder sb = new StringBuilder();
-            sb.AppendLine(indent + data.Name + ": (" + SerializeSingle(vector.A) + ", " + SerializeSingle(vector.B) + ", " + SerializeSingle(vector.C) + ", " + SerializeSingle(vector.D) + ")");
+            sb.AppendLine(indent + data.Name + ": (" + SerializeSingle(vector.A) + "; " + SerializeSingle(vector.B) + ", " + SerializeSingle(vector.C) + ", " + SerializeSingle(vector.D) + ")");
             return sb.ToString();
         }
         public static string SerializeInt32Vector3(ref BSII_DataSegment data, ref string indent)

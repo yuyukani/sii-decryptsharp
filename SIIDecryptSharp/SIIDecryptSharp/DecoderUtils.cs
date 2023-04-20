@@ -210,7 +210,8 @@ namespace SIIDecryptSharp
         //0x18
         public static SingleVector4[] DecodeSingleVector4Array(ref byte[] bytes, ref int offset)
         {
-            var numberOfVector4s = Convert.ToInt32(DecodeUInt32(ref bytes, ref offset));
+            var number = DecodeUInt32(ref bytes, ref offset);
+            var numberOfVector4s = Convert.ToInt32(number);
             var result = new SingleVector4[numberOfVector4s];
             for (int i = 0; i < numberOfVector4s; i++)
             {

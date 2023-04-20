@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="game.1.47.0.sii" />
+    <None Remove="game.1.47.sii" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SIIDecryptSharp\SIIDecryptSharp.csproj" />
   </ItemGroup>
 

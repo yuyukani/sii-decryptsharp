@@ -8,26 +8,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="game.1.46.sii" />
+    <None Remove="game.1.47.0.sii" />
+    <None Remove="game.1.47.2.sii" />
     <None Remove="game.1.47.sii" />
+    <None Remove="info.sii" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SIIDecryptSharp\SIIDecryptSharp.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="game.1.46.sii">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="game.1.47.0.sii">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="game.1.47.2.sii">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="info.sii">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

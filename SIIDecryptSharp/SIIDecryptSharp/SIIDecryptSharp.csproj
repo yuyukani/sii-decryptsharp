@@ -20,9 +20,9 @@
     <Platforms>AnyCPU;ARM32;ARM64;x64;x86</Platforms>
     <Configurations>Debug;Release;</Configurations>
     <SignAssembly>False</SignAssembly>
-    <AssemblyVersion></AssemblyVersion>
-    <FileVersion></FileVersion>
-    <Version>1.0.0-alpha9</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>

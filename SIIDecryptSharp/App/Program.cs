@@ -8,8 +8,18 @@ namespace App
         {
             if (File.Exists("game.sii"))
             {
-                var raw = Decryptor.Decrypt(Path.Combine(Directory.GetCurrentDirectory(), "game.sii"));
-                File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "game.decrypted.sii"), System.Text.Encoding.UTF8.GetString(raw));
+                try
+                {
+                    var raw = Decryptor.Decrypt(Path.Combine(Directory.GetCurrentDirectory(), "game.sii"));
+                    File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "game.decrypted.sii"), System.Text.Encoding.UTF8.GetString(raw));
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Exception");
+                    Console.WriteLine(ex.Message.ToString());
+                    Console.WriteLine("\r\n\r\nStack:");
+                    Console.WriteLine(ex.StackTrace?.ToString() ?? string.Empty);
+                }
             }
             else
             {

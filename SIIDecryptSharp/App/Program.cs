@@ -6,10 +6,18 @@ namespace App
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            if (File.Exists("game.sii"))
+            {
+                var raw = Decryptor.Decrypt(Path.Combine(Directory.GetCurrentDirectory(), "game.sii"));
+                File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "game.decrypted.sii"), System.Text.Encoding.UTF8.GetString(raw));
+            }
+            else
+            {
+                Console.WriteLine("game.sii file does not exist. skipping.");
+            }
+            Console.Write("Done decrypting. Press any key to exit...");
+            Console.ReadKey();
 
-            var raw = Decryptor.Decrypt(Path.Combine(Directory.GetCurrentDirectory(), "game.1.47.0.sii"));
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "testing.1.47.0.txt"), System.Text.Encoding.UTF8.GetString(raw));
         }
     }
 }

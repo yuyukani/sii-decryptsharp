@@ -281,7 +281,14 @@ namespace SIIDecryptSharp
             {
                 if (int.TryParse(value[i], out int int32))
                 {
-                    sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i]);
+                    if (int32 >= 0)
+                    {
+                        sb.AppendLine(indent + data.Name + "[" + i + "]: " + value[i]);
+                    } else
+                    {
+                        sb.AppendLine(indent + data.Name + "[" + i + "]: \"" + value[i]+"\"");
+
+                    }
                 }
                 else
                 {

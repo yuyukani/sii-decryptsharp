@@ -75,7 +75,7 @@ namespace SIIDecryptSharp
                         throw new NotImplementedException("_3nK decoding is not implmented yet.");
                 }
             }
-            return new byte[0];
+            return bytes;
         }
 
         private static SII_Data Decrypt(ref byte[] encrypted, int offset)

@@ -6,12 +6,33 @@ namespace App
     {
         static void Main(string[] args)
         {
-            if (File.Exists("game.sii"))
+            bool decode = true;
+            foreach (string s in args)
             {
+                if (String.Compare(s, "--DecryptOnly", comparisonType: StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    decode = false;
+                    continue;
+                }
+                if (!File.Exists(s))
+                {
+                    Console.WriteLine(s + " file does not exist. skipping.");
+                    continue;
+                }
+                Console.WriteLine("decrypting " + s);
+
                 try
                 {
-                    var raw = Decryptor.Decrypt(Path.Combine(Directory.GetCurrentDirectory(), "game.sii"));
-                    File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "game.decrypted.sii"), System.Text.Encoding.UTF8.GetString(raw));
+                    var raw = Decryptor.Decrypt(s, decode);
+                    var dir = Path.GetDirectoryName(s);
+                    if (dir == null) dir = "";
+                    string bakfn = Path.Combine(dir, Path.GetFileName(s) + ".bak");
+                    if (File.Exists(bakfn))
+                    {
+                        File.Delete(bakfn);
+                    }
+                    File.Move(s, bakfn);
+                    File.WriteAllBytes(s, raw);
                 }
                 catch(Exception ex)
                 {
@@ -19,15 +40,9 @@ namespace App
                     Console.WriteLine(ex.Message.ToString());
                     Console.WriteLine("\r\n\r\nStack:");
                     Console.WriteLine(ex.StackTrace?.ToString() ?? string.Empty);
+                    Console.ReadKey();
                 }
             }
-            else
-            {
-                Console.WriteLine("game.sii file does not exist. skipping.");
-            }
-            Console.Write("Done decrypting. Press any key to exit...");
-            Console.ReadKey();
-
         }
     }
 }

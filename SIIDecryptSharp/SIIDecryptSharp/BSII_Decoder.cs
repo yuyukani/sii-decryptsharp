@@ -326,7 +326,9 @@ namespace SIIDecryptSharp
                         segment.Segments[i].Value = BSII_Type_Decoder.DecodeUInt16(ref bytes, ref streamPos);
                         break;
                     case (int)DataTypeIdFormat.OrdinalString:
-                        segment.Segments[i].Value = BSII_Type_Decoder.GetOrdinalStringFromValues(values, ref bytes, ref streamPos); ;
+                        //segment.Segments[i].Value = BSII_Type_Decoder.GetOrdinalStringFromValues(values, ref bytes, ref streamPos);
+                        Dictionary<UInt32, string> dic = segment.Segments[i].Value as Dictionary<UInt32, string>;
+                        segment.Segments[i].Value = BSII_Type_Decoder.GetOrdinalStringFromValues(dic, ref bytes, ref streamPos); ;
                         break;
                     case (int)DataTypeIdFormat.Single:
                         segment.Segments[i].Value = BSII_Type_Decoder.DecodeSingle(ref bytes, ref streamPos);

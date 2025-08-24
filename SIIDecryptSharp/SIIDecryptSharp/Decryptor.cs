@@ -47,7 +47,12 @@ namespace SIIDecryptSharp
                 throw new Exception("Invalid file");
             }
 
-            if(fileType == (UInt32)SignatureType.Encrypted)
+            if (fileType == (UInt32)SignatureType.PlainText)
+            {
+                return new byte[0];
+            }
+
+            if (fileType == (UInt32)SignatureType.Encrypted)
             {
                 var data = Decrypt(ref bytes, streamPos);
                 bytes = data.Data;

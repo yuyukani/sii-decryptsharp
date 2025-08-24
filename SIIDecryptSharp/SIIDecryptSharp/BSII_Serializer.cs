@@ -160,7 +160,7 @@ namespace SIIDecryptSharp
                 
 
             }
-            sb.Append("}");
+            sb.Append("}").AppendLine("");
             return System.Text.Encoding.UTF8.GetBytes(sb.ToString());
         }
 

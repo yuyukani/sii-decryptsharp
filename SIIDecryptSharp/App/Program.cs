@@ -24,15 +24,18 @@ namespace App
                 try
                 {
                     var raw = Decryptor.Decrypt(s, decode);
-                    var dir = Path.GetDirectoryName(s);
-                    if (dir == null) dir = "";
-                    string bakfn = Path.Combine(dir, Path.GetFileName(s) + ".bak");
-                    if (File.Exists(bakfn))
+                    if (raw.Length > 0)
                     {
-                        File.Delete(bakfn);
+                        var dir = Path.GetDirectoryName(s);
+                        if (dir == null) dir = "";
+                        string bakfn = Path.Combine(dir, Path.GetFileName(s) + ".bak");
+                        if (File.Exists(bakfn))
+                        {
+                            File.Delete(bakfn);
+                        }
+                        File.Move(s, bakfn);
+                        File.WriteAllBytes(s, raw);
                     }
-                    File.Move(s, bakfn);
-                    File.WriteAllBytes(s, raw);
                 }
                 catch(Exception ex)
                 {
